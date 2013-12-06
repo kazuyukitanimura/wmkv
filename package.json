@@ -1,0 +1,13 @@
+{
+  "version": "0.0.1"
+, "name": "WMKV: Wavelet Matrix Key-Value Dictionary"
+, "description": "Super memory-efficient Javascript key-value dictionary library"
+, "private": true
+, "engine": "node >= 0.10.22"
+, "main": "./wmkv.js"
+, "author": {
+    "name": "kazuyukitanimura",
+    "email": "kazuyukitanimura@gmail.com"
+  }
+, "license": "MIT"
+}
