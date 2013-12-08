@@ -7,7 +7,7 @@ var Bitmap = require('./bitmap');
  */
 var Wm = module.exports = function(keyLength) {
   if (!keyLength) {
-    throw Error('invalid keyLength');
+    throw Error('Invalid keyLength');
   }
   if (! (this instanceof Wm)) { // enforcing new
     return new Wm(keyLength);
@@ -20,8 +20,24 @@ var Wm = module.exports = function(keyLength) {
   }
 };
 
-Wm.prototype.rank = function(key) {
-  // TODO
+/**
+ * Count the occurance of key
+ *
+ * @param key {String} key to count
+ * @param pos {Number} position starting from 0
+ */
+Wm.prototype.rank = function(key, pos) {
+  var keyLength = this.keyLength;
+  if (key.length !== keyLength) {
+    throw Error('Invalid key');
+  }
+  var _matrix = this._matrix;
+  var keyBits = new Bitmap(new Buffer(key));
+  var keyBitsL = keyLength * 8;
+  for (var i = 0; i < keyBitsL; i++) {
+    pos = _matrix[i].rank(keyBits.get(i), pos);
+  }
+  return pos;
 };
 
 Wm.prototype.select = function(key) {

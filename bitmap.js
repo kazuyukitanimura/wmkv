@@ -19,7 +19,7 @@ new Uint8Array([8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8
  * @param b {Number} 0 or 1
  * @param pos {Number} position starting from 0
  */
-Bitmap.prototype.rank = function(b, pos) {
+Bitmap.prototype.rank = function(b, pos, from) {
   var bytes = this.bytes;
   pos = (pos + 1) || bytes * 8; // if pos is undefined, entire length
   var total = 0;
