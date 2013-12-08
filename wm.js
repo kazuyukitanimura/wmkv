@@ -1,5 +1,13 @@
 var Bitmap = require('persistable-bitmap');
 
+Bitmap.prototype.rank = function(b, pos) {
+  // TODO
+};
+
+Bitmap.prototype.select = function(b, ind) {
+  // TODO
+};
+
 /**
  * Wavelet Matrix Class
  *
@@ -20,7 +28,7 @@ var Wm = module.exports = function(keyLength) {
   }
 };
 
-Wm.prototype.rank = function() {
+Wm.prototype.rank = function(key) {
   // TODO
 };
 
@@ -45,8 +53,16 @@ Wm.prototype.update = function(addKeys, removeKeys) {
   } else if (!Array.isArray(removeKeys)) {
     removeKeys = [removeKeys];
   }
-  this.length += addKeys.length - removeKeys.length;
-  // TODO
+  var i = 0;
+  var key = '';
+  for (i = removeKeys.length; i--;) {
+    key = removeKeys[i];
+  }
+  for (i = addKeys.length; i--;) {
+    key = removeKeys[i];
+
+  }
+  this.length += addKeys.length - removeKeys.length; // FIXME removeKeys may contain keys that do not exist
 };
 
 Bitmap.chunksize = 1024;

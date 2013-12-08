@@ -33,7 +33,7 @@ var Wmkv = module.exports = function(Values, maxCacheSize) {
   //      ...
   //     },
   //  ...
-  this._maxCacheSize = maxCacheSize || 1024;
+  this._maxCacheSize = maxCacheSize || Wm.Bitmap.chunksize;
   this._cacheSize = 0;
 };
 
