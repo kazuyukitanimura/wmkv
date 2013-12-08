@@ -111,14 +111,16 @@ Wmkv.prototype.compaction = function() {
       var vals = _wmkv[d];
       var addKeys = [];
       var removeKeys = [];
-      for (var key in cacheKv) {
+      var key = '';
+      var pos = 0;
+      for (key in cacheKv) {
         if (cacheKv.hasOwnProperty(key)) {
           var val = cacheKv[key];
           if (val === null) {
             removeKeys.push(key);
             continue;
           }
-          var pos = wm.select(key);
+          pos = wm.select(key);
           if (pos--) {
             vals[pos] = val;
           } else {
@@ -128,8 +130,8 @@ Wmkv.prototype.compaction = function() {
       }
       wm.update(addKeys, removeKeys);
       for (var i = addKeys.length; i--;) {
-        var key = addKeys[i];
-        var pos = wm.select(key);
+        key = addKeys[i];
+        pos = wm.select(key);
         if (pos--) {
           vals[pos] = cacheKv[key];
         } else {
