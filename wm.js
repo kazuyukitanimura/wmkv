@@ -2,6 +2,8 @@ var Bitmap = require('persistable-bitmap');
 
 /**
  * Wavelet Matrix Class
+ *
+ * @param keyLength {Number} the length of keys in byte
  */
 var Wm = module.exports = function(keyLength) {
   if (!keyLength) {
@@ -12,8 +14,10 @@ var Wm = module.exports = function(keyLength) {
   }
   this.keyLength = keyLength;
   this.length = 0;
-  // row: key, col: bits
-  // TODO
+  var _matrix = this._matrix = new Array(keyLength * 8); // row: bits, col: key
+  for (var i = _matrix.length; i--;) {
+    _matrix[i] = new Bitmap(null);
+  }
 };
 
 Wm.prototype.rank = function() {
@@ -24,6 +28,12 @@ Wm.prototype.select = function(key) {
   // TODO
 };
 
+/**
+ * Update the wavelet matrix given keys to add and remove
+ *
+ * @param addKeys {Array} keys to add
+ * @param removeKeys {Array} keys to remove
+ */
 Wm.prototype.update = function(addKeys, removeKeys) {
   if (!addKeys) {
     addKeys = [];
@@ -39,3 +49,5 @@ Wm.prototype.update = function(addKeys, removeKeys) {
   // TODO
 };
 
+Bitmap.chunksize = 1024;
+Wm.Bitmap = Bitmap;

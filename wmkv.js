@@ -37,6 +37,11 @@ var Wmkv = module.exports = function(Values, maxCacheSize) {
   this._cacheSize = 0;
 };
 
+/**
+ * get function
+ *
+ * @param key {String} key to retrieve
+ */
 Wmkv.prototype.get = function(key) {
   var l = key.length;
   var cacheKv = this._cacheKv[l];
@@ -46,10 +51,17 @@ Wmkv.prototype.get = function(key) {
   var d = l + 'd';
   var m = l + 'm';
   var _wmkv = this._wmkv;
-  var pos = _wmkv[m].select(key);
+  var wm = _wmkv[m];
+  var pos = wm? wm.select(key) : 0;
   return (pos--) ? _wmkv[d][pos] : undefined;
 };
 
+/**
+ * set function
+ *
+ * @param key {String} key to save
+ * @param val {String, Object, Number} any value that this._Values can contain
+ */
 Wmkv.prototype.set = function(key, val) {
   var l = key.length;
   var cacheKv = this._cacheKv[l];
@@ -65,6 +77,12 @@ Wmkv.prototype.set = function(key, val) {
   }
 };
 
+
+/**
+ * delete function
+ *
+ * @param key {String} key to delete
+ */
 Wmkv.prototype.del = function(key) {
   var l = key.length;
   var cacheKv = this._cacheKv[l];
@@ -124,6 +142,9 @@ Wmkv.prototype.compaction = function() {
   this._cacheSize = 0;
 };
 
+/**
+ * Serialize to store in DB
+ */
 Wmkv.prototype.serialize = function() {
   this.compaction();
   // TODO
