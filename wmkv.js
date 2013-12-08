@@ -1,10 +1,19 @@
-var Bitmap = require( 'persistable-bitmap' );
+var Bitmap = require('persistable-bitmap');
 
 /**
  * Wavelet Matrix Class
  */
-var Wm = function() {
-
+var Wm = function(keyLength) {
+  if (!keyLength) {
+    throw Error('invalid keyLength');
+  }
+  if (! (this instanceof Wm)) { // enforcing new
+    return new Wm(keyLength);
+  }
+  this.keyLength = keyLength;
+  this.length = 0;
+  // row: key, col: bits
+  // TODO
 };
 
 Wm.prototype.rank = function() {
@@ -19,11 +28,15 @@ Wm.prototype.add = function(keys) {
   if (!Array.isArray(keys)) {
     keys = [keys];
   }
+  this.length += keys.length;
   // TODO
 };
 
 Wm.prototype.remove = function(key) {
-  // TODO
+  var pos = this.select(key);
+  if (pos) {
+    // TODO
+  }
 };
 
 /**
@@ -47,18 +60,6 @@ var Wmkv = module.exports = function(Values, maxCacheSize) {
   this._cacheKv = {}; // cache key value
   this._maxCacheSize = maxCacheSize || 1024;
   this._cacheSize = 0;
-};
-
-Wmkv.prototype._append = function(key, val) {
-  var l = key.length;
-  var d = l + 'd';
-  var m = l + 'm';
-  var _wmkv = this._wmkv;
-  var vals = _wmkv[d];
-  var pos = vals.length;
-  vals[pos] = val;
-  var wm = _wmkv[m];
-  wm.add(key); // TODO
 };
 
 Wmkv.prototype.get = function(key) {
@@ -88,30 +89,43 @@ Wmkv.prototype.set = function(key, val) {
 Wmkv.prototype.del = function(key) {
   var _cacheKv = this._cacheKv;
   if (_cacheKv.hasOwnProperty(key)) {
-    _cacheKv[key] = undefined;
+    _cacheKv[key] = null;
   }
-  // No need to update this._wmkv since the cache keeps key: undefined
+  // No need to update this._wmkv since the cache keeps key: null
 };
 
 /**
  * Move all cache data to the wavelet matrix
  */
 Wmkv.prototype.compaction = function() {
-  var l = key.length;
-  var d = l + 'd';
-  var m = l + 'm';
+  var _cacheKv = this._cacheKv;
   var _wmkv = this._wmkv;
-  if (!_wmkv.hasOwnProperty(d)) {
-    _wmkv[d] = new this._Values();
-    _wmkv[m] = []; // row: key, col: bits
+  for (var key in _cacheKv) {
+    if (_cacheKv.hasOwnProperty(key)) {
+      var val = _cacheKv[key];
+      var l = key.length;
+      var d = l + 'd';
+      var m = l + 'm';
+      if (!_wmkv.hasOwnProperty(d)) {
+        _wmkv[d] = new this._Values();
+        _wmkv[m] = new Wm(l);
+      }
+      var wm = _wmkv[m];
+      if (val === null) {
+        wm.remove(key);
+        continue;
+      }
+      var pos = wm.select(key);
+      if (pos--) {
+        _wmkv[d][pos] = val;
+      } else {
+        var vals = _wmkv[d];
+        pos = wm.length;
+        vals[pos] = val;
+        _wmkv[m].add(key);
+      }
+    }
   }
-  var pos = this._select(key);
-  if (pos--) {
-    _wmkv[d][pos] = val;
-  } else {
-    this._append(key, val);
-  }
-  // TODO
   this._cacheKv = {};
   this._cacheSize = 0;
 };
