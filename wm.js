@@ -1,12 +1,4 @@
-var Bitmap = require('persistable-bitmap');
-
-Bitmap.prototype.rank = function(b, pos) {
-  // TODO
-};
-
-Bitmap.prototype.select = function(b, ind) {
-  // TODO
-};
+var Bitmap = require('./bitmap');
 
 /**
  * Wavelet Matrix Class
@@ -67,3 +59,4 @@ Wm.prototype.update = function(addKeys, removeKeys) {
 
 Bitmap.chunksize = 1024;
 Wm.Bitmap = Bitmap;
+
