@@ -18,6 +18,7 @@ var Wm = module.exports = function(keyLength) {
   for (var i = _matrix.length; i--;) {
     _matrix[i] = new Bitmap(null);
   }
+  this._bounaries = new Uint32Array(keyLength * 8);
 };
 
 /**
@@ -32,10 +33,27 @@ Wm.prototype.rank = function(key, pos) {
     throw Error('Invalid key');
   }
   var _matrix = this._matrix;
-  var keyBits = new Bitmap(new Buffer(key));
-  var keyBitsL = keyLength * 8;
-  for (var i = 0; i < keyBitsL; i++) {
-    pos = _matrix[i].rank(keyBits.get(i), pos);
+  var _bounaries = this._bounaries;
+  var bits = new Bitmap(new Buffer(key));
+  var bitsL = keyLength * 8;
+  var bit = bits.get(0);
+  var oldBit = 0;
+  var bound = 0;
+  var range = new Uint32Array([0, this.length]);
+  pos = _matrix[0].rank(bit, range);
+  for (var i = 1; i < bitsL; i++) {
+    bound = _bounaries[i];
+    if (!(bit | oldBit)) {
+      range[1] = range[0] + pos;
+    } else if (bit & oldBit) {
+      range[0] = range[1] - pos;
+    } else {
+      range[1] = bound + pos * bit;
+      range[0] = bound - pos * oldBit;
+    }
+    oldBit = bit;
+    bit = bits.get(i);
+    pos = _matrix[i].rank(bit, range);
   }
   return pos;
 };

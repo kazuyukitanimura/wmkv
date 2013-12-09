@@ -19,8 +19,11 @@ new Uint8Array([8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8
  * @param b {Number} 0 or 1
  * @param pos {Number} position starting from 0
  */
-Bitmap.prototype.rank = function(b, pos, from) {
+Bitmap.prototype.rank = function(b, pos) {
   var bytes = this.bytes;
+  if (!pos) {
+    return 0;
+  }
   pos = (pos + 1) || bytes * 8; // if pos is undefined, entire length
   var total = 0;
   bytes = pos / 8 | 0;
@@ -42,7 +45,7 @@ Bitmap.prototype.select = function(b, ind) {
   var bytes = this.bytes;
   ind = ind | 0; // if ind is undefined, the first one
   var pos = 0;
-  b = (!b && 0xFF) | 0;
+  b = (!b && 0xFF) | 0; // change to 0x00 or 0xFF
   var a = this.buffer;
   for (var i = 0; ind > 7 && i < bytes; i++) {
     ind -= RANK_TABLE[a[i] ^ b];
