@@ -58,8 +58,42 @@ Wm.prototype.rank = function(key, pos) {
   return pos;
 };
 
-Wm.prototype.select = function(key) {
-  // TODO
+/**
+ * Find the position of key
+ *
+ * @param key {String} key to count
+ * @param ind {Number} position starting from 0
+ */
+Wm.prototype.select = function(key, ind) {
+  var keyLength = this.keyLength;
+  if (key.length !== keyLength) {
+    throw new Error('Invalid key');
+  }
+  var _matrix = this._matrix;
+  var _bounaries = this._bounaries;
+  var bits = new Bitmap(new Buffer(key));
+  var bitsL = keyLength * 8;
+  var i = bitsL - 1;
+  var bit = bits.get(i);
+  var oldBit = 0;
+  var bound = _bounaries[i];
+  ind = ind | 0;
+  var range = new Uint32Array([0, this.length]);
+  for (; i--;) {
+    oldBit = bit;
+    bit = bits.get(i);
+    if (!(bit | oldBit)) {
+      range[1] = range[0] + ind;
+    } else if (bit & oldBit) {
+      range[0] = range[1] - ind;
+    } else {
+      range[1] = bound + ind * bit;
+      range[0] = bound - ind * oldBit;
+    }
+    ind = _matrix[i].select(bit, range);
+    bound = _bounaries[i];
+  }
+  return ind;
 };
 
 /**
