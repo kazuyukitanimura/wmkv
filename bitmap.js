@@ -14,25 +14,31 @@ new Uint8Array([8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8
 ];
 
 /**
- * Count 1 bits between [0...pos)
+ * Count 1 bits between the range
  *
  * @param b {Number} 0 or 1
- * @param pos {Number} position starting from 0
+ * @param range {Array} positions [range[0]...range[0])
  */
-Bitmap.prototype.rank = function(b, pos) {
+Bitmap.prototype.rank = function(b, range) {
   var bytes = this.bytes;
-  if (!pos) {
-    return 0;
+  if (!range) {
+    range = [0, bytes * 8]; // if range is undefined, entire length
   }
-  pos = (pos + 1) || bytes * 8; // if pos is undefined, entire length
-  var total = 0;
-  bytes = pos / 8 | 0;
+  var lo = range[0] | 0;
+  var hi = range[1] | 0;
+  if (lo < 0 || hi < 0 || lo > hi) {
+    throw new Error('Invalid range');
+  }
+  var start = lo / 8 | 0;
+  bytes = hi / 8 | 0;
   var a = this.buffer;
-  for (var i = 0; i < bytes; i++) {
+  var total = 0;
+  for (var i = start; i < bytes; i++) {
     total += RANK_TABLE[a[i]];
   }
-  total += RANK_TABLE[a[bytes] >> (++bytes * 8 - pos)];
-  return b ? total: pos - total;
+  total += RANK_TABLE[a[bytes] >> (++bytes * 8 - hi)];
+  total -= RANK_TABLE[a[start] >> (++start * 8 - lo)];
+  return b ? total: hi - total - lo;
 };
 
 /**

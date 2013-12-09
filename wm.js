@@ -7,7 +7,7 @@ var Bitmap = require('./bitmap');
  */
 var Wm = module.exports = function(keyLength) {
   if (!keyLength) {
-    throw Error('Invalid keyLength');
+    throw new Error('Invalid keyLength');
   }
   if (! (this instanceof Wm)) { // enforcing new
     return new Wm(keyLength);
@@ -30,7 +30,7 @@ var Wm = module.exports = function(keyLength) {
 Wm.prototype.rank = function(key, pos) {
   var keyLength = this.keyLength;
   if (key.length !== keyLength) {
-    throw Error('Invalid key');
+    throw new Error('Invalid key');
   }
   var _matrix = this._matrix;
   var _bounaries = this._bounaries;
@@ -39,7 +39,7 @@ Wm.prototype.rank = function(key, pos) {
   var bit = bits.get(0);
   var oldBit = 0;
   var bound = 0;
-  var range = new Uint32Array([0, this.length]);
+  var range = new Uint32Array([0, pos || this.length]);
   pos = _matrix[0].rank(bit, range);
   for (var i = 1; i < bitsL; i++) {
     bound = _bounaries[i];
