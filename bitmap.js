@@ -17,20 +17,19 @@ new Uint8Array([8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8
  * Count 1 bits between the range
  *
  * @param b {Number} 0 or 1
- * @param range {Array} positions [range[0]...range[1])
+ * @param lo {Number} lower inclusive bound positions
+ * @param hi {Number} higher exclusive bound positions
  */
-Bitmap.prototype.rank = function(b, range) {
+Bitmap.prototype.rank = function(b, lo, hi) {
   var bytes = this.bytes;
-  if (!range) {
-    range = [0, bytes * 8]; // if range is undefined, entire length
-  }
-  var lo = range[0] | 0;
-  var hi = range[1] | 0;
+  // if range is undefined, entire length
+  lo = lo | 0;
+  hi = hi || bytes * 8;
   if (lo < 0 || hi < 0 || lo > hi) {
     throw new Error('Invalid range');
   }
-  var start = lo / 8 | 0;
-  bytes = hi / 8 | 0;
+  var start = lo >> 3;
+  bytes = hi >> 3;
   var a = this.buffer;
   var total = 0;
   for (var i = start; i < bytes; i++) {
@@ -45,15 +44,22 @@ Bitmap.prototype.rank = function(b, range) {
  * Find the position of (ind + 1)th b bit
  *
  * @param b {Number} 0 or 1
- * @param range {Array} position [range[0]...range[1])
+ * @param lo {Number} lower inclusive bound positions
+ * @param ind {Number} find (ind + 1)th b bit
  */
-Bitmap.prototype.select = function(b, ind) {
+Bitmap.prototype.select = function(b, lo, ind) {
   var bytes = this.bytes;
   ind = ind | 0; // if ind is undefined, the first one
-  var pos = 0;
+  lo = lo | 0;
+  if (lo < 0 || ind < 0) {
+    throw new Error('Invalid range');
+  }
+  var start = lo >> 3;
   b = (!b && 0xFF) | 0; // change to 0x00 or 0xFF
   var a = this.buffer;
-  for (var i = 0; ind > 7 && i < bytes; i++) {
+  var pos = 0;
+  ind += RANK_TABLE[a[start] >> ((start + 1) * 8 - lo)];
+  for (var i = start; ind > 7 && i < bytes; i++) {
     ind -= RANK_TABLE[a[i] ^ b];
   }
   for (; i < bytes; i++) {

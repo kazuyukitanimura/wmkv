@@ -3,21 +3,25 @@ var Bitmap = require('../bitmap');
 /**
  * Population count. Same as Bitmap.prototype.count
  */
+var arraybuf = new Uint32Array(1024/4);
 Bitmap.prototype.popCount = function() {
   var count = 0;
   var bytes = this.bytes;
   var units = bytes / 4 | 0;
-  var buf = this.buffer;
+  //var buf = this.buffer;
+  var buf = arraybuf;
   var v = 0;
   for (var i = units; i--;) {
-    v = buf.readUInt32BE(i * 4, true);
+    //v = buf.readUInt32BE(i * 4, true);
+    v = buf[i];
     v = v - ((v >>> 1) & 0x55555555);
     v = (v & 0x33333333) + ((v >>> 2) & 0x33333333);
     count += ((v + (v >>> 4) & 0xF0F0F0F) * 0x1010101) >>> 24;
   }
   var rem = bytes - units * 4;
   var shift = (4 - rem) * 8;
-  v = buf.readUInt32BE(units * 4, true) >> shift;
+  //v = buf.readUInt32BE(units * 4, true) >> shift;
+  v = buf[i] >> shift;
   v = v - ((v >>> 1) & 0x55555555);
   v = (v & 0x33333333) + ((v >>> 2) & 0x33333333);
   count += ((v + (v >>> 4) & 0xF0F0F0F) * 0x1010101) >>> 24;

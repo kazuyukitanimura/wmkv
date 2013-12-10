@@ -18,82 +18,50 @@ var Wm = module.exports = function(keyLength) {
   for (var i = _matrix.length; i--;) {
     _matrix[i] = new Bitmap(null);
   }
-  this._bounaries = new Uint32Array(keyLength * 8);
-};
-
-/**
- * Count the occurance of key
- *
- * @param key {String} key to count
- * @param pos {Number} position starting from 0
- */
-Wm.prototype.rank = function(key, pos) {
-  var keyLength = this.keyLength;
-  if (key.length !== keyLength) {
-    throw new Error('Invalid key');
-  }
-  var _matrix = this._matrix;
-  var _bounaries = this._bounaries;
-  var bits = new Bitmap(new Buffer(key));
-  var bitsL = keyLength * 8;
-  var bit = bits.get(0);
-  var oldBit = 0;
-  var bound = 0;
-  var range = new Uint32Array([0, pos || this.length]);
-  pos = _matrix[0].rank(bit, range);
-  for (var i = 1; i < bitsL; i++) {
-    bound = _bounaries[i];
-    if (!(bit | oldBit)) {
-      range[1] = range[0] + pos;
-    } else if (bit & oldBit) {
-      range[0] = range[1] - pos;
-    } else {
-      range[1] = bound + pos * bit;
-      range[0] = bound - pos * oldBit;
-    }
-    oldBit = bit;
-    bit = bits.get(i);
-    pos = _matrix[i].rank(bit, range);
-  }
-  return pos;
 };
 
 /**
  * Find the position of key
  *
- * @param key {String} key to count
- * @param ind {Number} position starting from 0
+ * @param key {String} key to find
  */
-Wm.prototype.select = function(key, ind) {
+Wm.prototype.find = function(key) {
   var keyLength = this.keyLength;
   if (key.length !== keyLength) {
     throw new Error('Invalid key');
   }
   var _matrix = this._matrix;
-  var _bounaries = this._bounaries;
-  var bits = new Bitmap(new Buffer(key));
   var bitsL = keyLength * 8;
-  var i = bitsL - 1;
-  var bit = bits.get(i);
-  var oldBit = 0;
-  var bound = _bounaries[i];
-  ind = ind | 0;
-  var range = new Uint32Array([0, this.length]);
-  for (; i--;) {
-    oldBit = bit;
-    bit = bits.get(i);
-    if (!(bit | oldBit)) {
-      range[1] = range[0] + ind;
-    } else if (bit & oldBit) {
-      range[0] = range[1] - ind;
+  var lo = 0;
+  var hi = this.length;
+  var bit = (key.charCodeAt(0) >> 7) & 1;
+  var rank = _matrix[0].rank(bit, lo, hi);
+  var i = 1;
+  for (; i < bitsL && rank; i++) {
+    if (bit) {
+      lo = hi - rank;
     } else {
-      range[1] = bound + ind * bit;
-      range[0] = bound - ind * oldBit;
+      hi = lo + rank;
     }
-    ind = _matrix[i].select(bit, range);
-    bound = _bounaries[i];
+    bit = (key.charCodeAt(i >> 3) >> (~i & 0x07)) & 1;
+    rank = _matrix[i].rank(bit, lo, hi);
   }
-  return ind;
+  if (!rank) {
+    return -1;
+  } else if (rank !== 1) {
+    throw new Error('Multiple key entries are found');
+  }
+  var select = 0;
+  for (i = bitsL - 1; i--;) {
+    bit = (key.charCodeAt(i >> 3) >> (~i & 0x07)) & 1;
+    select = _matrix[i].select(bit, lo, hi, select);
+    if (bit) {
+      lo = hi - select;
+    } else {
+      hi = lo + select;
+    }
+  }
+  return select;
 };
 
 /**
@@ -125,6 +93,6 @@ Wm.prototype.update = function(addKeys, removeKeys) {
   this.length += addKeys.length - removeKeys.length; // FIXME removeKeys may contain keys that do not exist
 };
 
-Bitmap.chunksize = 1024;
+Bitmap.chunksize = 256;
 Wm.Bitmap = Bitmap;
 
