@@ -36,30 +36,27 @@ Wm.prototype.find = function(key) {
   var hi = this.length;
   var bit = (key.charCodeAt(0) >> 7) & 1;
   var rank = _matrix[0].rank(bit, lo, hi);
+  var select = _matrix[0].select(bit, 0, 0);
+  var firstBit = bit;
   var i = 1;
   for (; i < bitsL && rank; i++) {
+    var ind = lo;
     if (bit) {
       lo = hi - rank;
+      ind = lo - ind;
     } else {
       hi = lo + rank;
     }
     bit = (key.charCodeAt(i >> 3) >> (~i & 0x07)) & 1;
     rank = _matrix[i].rank(bit, lo, hi);
+    if (ind) {
+      select = _matrix[0].select(firstBit, select, ind);
+    }
   }
   if (!rank) {
     return -1;
   } else if (rank !== 1) {
     throw new Error('Multiple key entries are found');
-  }
-  var select = 0;
-  for (i = bitsL - 1; i--;) {
-    bit = (key.charCodeAt(i >> 3) >> (~i & 0x07)) & 1;
-    select = _matrix[i].select(bit, lo, hi, select);
-    if (bit) {
-      lo = hi - select;
-    } else {
-      hi = lo + select;
-    }
   }
   return select;
 };

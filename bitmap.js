@@ -58,7 +58,7 @@ Bitmap.prototype.select = function(b, lo, ind) {
   b = (!b && 0xFF) | 0; // change to 0x00 or 0xFF
   var a = this.buffer;
   var pos = 0;
-  ind += RANK_TABLE[a[start] >> ((start + 1) * 8 - lo)];
+  ind += RANK_TABLE[(a[start] ^ b) >> ((start + 1) * 8 - lo)];
   for (var i = start; ind > 7 && i < bytes; i++) {
     ind -= RANK_TABLE[a[i] ^ b];
   }
@@ -66,7 +66,7 @@ Bitmap.prototype.select = function(b, lo, ind) {
     var ai = a[i] ^ b;
     pos = SELECT_TABLE[ind][ai];
     if (pos !== 8) {
-      return i * 8 + pos;
+      return i * 8 + pos; // - lo;
     }
     ind -= RANK_TABLE[ai];
   }
