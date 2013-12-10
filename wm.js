@@ -65,6 +65,13 @@ Wm.prototype.find = function(key) {
 };
 
 /**
+ * Merge the current _matrix with a newMatrix recursively
+ */
+Wm.prototype._merge = function(newMatrix, length) {
+  // TODO
+};
+
+/**
  * Update the wavelet matrix given keys to add and remove
  *
  * @param addKeys {Array} keys to add
@@ -82,14 +89,30 @@ Wm.prototype.update = function(addKeys, removeKeys) {
     removeKeys = [removeKeys];
   }
   var i = 0;
+  var j = 0;
   var key = '';
-  for (i = removeKeys.length; i--;) {
-    key = removeKeys[i];
+  var keyLength = this.keyLength;
+  var bitsL = keyLength * 8;
+  // create a new matrix first and merge with the existing one later
+  var newMatrix = new Array(keyLength * 8);
+  for (i = newMatrix.length; i--;) {
+    newMatrix[i] = new Bitmap(null);
   }
-  for (i = addKeys.length; i--;) {
-    key = removeKeys[i];
-
+  // TODO support remove later
+  //for (i = removeKeys.length; i--;) {
+  //  key = removeKeys[i];
+  //}
+  for (i = 0; i < bitsL; i++) {
+    for (j = addKeys.length; j--;) { // FIXME for now we do not check repeated/existing keys
+      key = removeKeys[j];
+      bit = (key.charCodeAt(i >> 3) >> (~i & 0x07)) & 1;
+      if (bit) {
+        newMatrix[i].set(j);
+      }
+    }
   }
+  this._merge(newMatrix, addKeys.length);
+  // merge step
   this.length += addKeys.length - removeKeys.length; // FIXME removeKeys may contain keys that do not exist
 };
 

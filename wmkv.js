@@ -52,8 +52,8 @@ Wmkv.prototype.get = function(key) {
   var m = l + 'm';
   var _wmkv = this._wmkv;
   var wm = _wmkv[m];
-  var pos = wm? wm.select(key) : 0;
-  return (pos--) ? _wmkv[d][pos] : undefined;
+  var pos = wm? wm.find(key) : 0;
+  return pos ? _wmkv[d][pos] : undefined;
 };
 
 /**
@@ -120,8 +120,8 @@ Wmkv.prototype.compaction = function() {
             removeKeys.push(key);
             continue;
           }
-          pos = wm.select(key);
-          if (pos--) {
+          pos = wm.find(key);
+          if (pos) {
             vals[pos] = val;
           } else {
             addKeys.push(key);
@@ -131,8 +131,8 @@ Wmkv.prototype.compaction = function() {
       wm.update(addKeys, removeKeys);
       for (var i = addKeys.length; i--;) {
         key = addKeys[i];
-        pos = wm.select(key);
-        if (pos--) {
+        pos = wm.find(key);
+        if (pos) {
           vals[pos] = cacheKv[key];
         } else {
           throw Error('Wow, you cannot reach here!');
